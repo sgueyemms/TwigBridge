@@ -93,13 +93,15 @@ class ServiceProvider extends ViewServiceProvider
      */
     protected function registerExtension()
     {
-        $this->app['view']->addExtension(
-            $this->app['twig.extension'],
-            'twig',
-            function () {
-                return $this->app['twig.engine'];
-            }
-        );
+        foreach ($this->app['twig.extension'] as $extension) {
+            $this->app['view']->addExtension(
+                $extension,
+                'twig',
+                function () {
+                    return $this->app['twig.engine'];
+                }
+            );
+        }
     }
 
     /**
@@ -136,7 +138,12 @@ class ServiceProvider extends ViewServiceProvider
     protected function registerOptions()
     {
         $this->app->bindIf('twig.extension', function () {
-            return $this->app['config']->get('twigbridge.twig.extension');
+            return (array)$this->app['config']->get('twigbridge.twig.extension');
+        });
+        //pyk_printd($this->app['twig.extension']);
+
+        $this->app->bindIf('twig.normalizer', function () {
+            return new Twig\Normalizer($this->app['twig.extension']);
         });
 
         $this->app->bindIf('twig.options', function () {
@@ -191,7 +198,7 @@ class ServiceProvider extends ViewServiceProvider
             return new Twig\Loader(
                 $this->app['files'],
                 $this->app['view']->getFinder(),
-                $this->app['twig.extension']
+                $this->app['twig.normalizer']
             );
         });
 
@@ -220,6 +227,7 @@ class ServiceProvider extends ViewServiceProvider
                 $extensions = $this->app['twig.extensions'];
                 $lexer      = $this->app['twig.lexer'];
                 $twig       = new Bridge(
+                    $this->app['twig.normalizer'],
                     $this->app['twig.loader'],
                     $this->app['twig.options'],
                     $this->app

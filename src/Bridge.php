@@ -17,6 +17,7 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\View\ViewFinderInterface;
 use InvalidArgumentException;
 use Twig_Error;
+use TwigBridge\Twig\Normalizer;
 
 /**
  * Bridge functions between Laravel & Twig
@@ -29,6 +30,11 @@ class Bridge extends Twig_Environment
     const BRIDGE_VERSION = '0.10.0';
 
     /**
+     * @var Normalizer
+     */
+    protected $normalizer;
+
+    /**
      * @var \Illuminate\Contracts\Container\Container
      */
     protected $app;
@@ -36,7 +42,7 @@ class Bridge extends Twig_Environment
     /**
      * {@inheritdoc}
      */
-    public function __construct(Twig_LoaderInterface $loader, $options = [], Container $app = null)
+    public function __construct(Normalizer $normalizer, Twig_LoaderInterface $loader, $options = [], Container $app = null)
     {
         // Twig 2.0 doesn't support `true` anymore
         if (isset($options['autoescape']) && $options['autoescape'] === true) {
@@ -45,7 +51,8 @@ class Bridge extends Twig_Environment
         
         parent::__construct($loader, $options);
 
-        $this->app = $app;
+        $this->normalizer = $normalizer;
+        $this->app        = $app;
     }
 
     /**
@@ -132,12 +139,7 @@ class Bridge extends Twig_Environment
      */
     protected function normalizeName($name)
     {
-        $extension = '.' . $this->app['twig.extension'];
-        $length = strlen($extension);
-
-        if (substr($name, -$length, $length) === $extension) {
-            $name = substr($name, 0, -$length);
-        }
+        $name = $this->normalizer->normalizeName($name);
 
         // Normalize namespace and delimiters
         $delimiter = ViewFinderInterface::HINT_PATH_DELIMITER;
