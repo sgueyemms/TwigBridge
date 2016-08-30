@@ -188,12 +188,14 @@ class ServiceProvider extends ViewServiceProvider
         });
 
         $this->app->bindIf('twig.loader.viewfinder', function () {
-            return new Twig\Loader(
-                $this->app['files'],
-                $this->app['view']->getFinder(),
-                $this->app['twig.extension']
-            );
-        });
+            return new Twig\LoaderChain([
+                new Twig\Loader(
+                    $this->app['files'],
+                    $this->app['view']->getFinder(),
+                    new Twig\Normalizer($this->app['files'], $this->app['twig.extension'])
+                ),
+            ]);
+        }, true);
 
         $this->app->bindIf(
             'twig.loader',

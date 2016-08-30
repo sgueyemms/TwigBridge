@@ -11,9 +11,7 @@
 
 namespace TwigBridge\Twig;
 
-use Twig_LoaderInterface;
 use Twig_Error_Loader;
-use Twig_ExistsLoaderInterface;
 use InvalidArgumentException;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\View\ViewFinderInterface;
@@ -21,7 +19,7 @@ use Illuminate\View\ViewFinderInterface;
 /**
  * Basic loader using absolute paths.
  */
-class Loader implements Twig_LoaderInterface, Twig_ExistsLoaderInterface
+class Loader implements LoaderInterface
 {
     /**
      * @var \Illuminate\Filesystem\Filesystem
@@ -34,9 +32,9 @@ class Loader implements Twig_LoaderInterface, Twig_ExistsLoaderInterface
     protected $finder;
 
     /**
-     * @var string Twig file extension.
+     * @var NormalizerInterface
      */
-    protected $extension;
+    protected $normalizer;
 
     /**
      * @var array Template lookup cache.
@@ -46,13 +44,13 @@ class Loader implements Twig_LoaderInterface, Twig_ExistsLoaderInterface
     /**
      * @param \Illuminate\Filesystem\Filesystem     $files     The filesystem
      * @param \Illuminate\View\ViewFinderInterface  $finder
-     * @param string                                $extension Twig file extension.
+     * @param \TwigBridge\Twig\NormalizerInterface   $normalizer
      */
-    public function __construct(Filesystem $files, ViewFinderInterface $finder, $extension = 'twig')
+    public function __construct(Filesystem $files, ViewFinderInterface $finder, NormalizerInterface $normalizer)
     {
-        $this->files     = $files;
-        $this->finder    = $finder;
-        $this->extension = $extension;
+        $this->files       = $files;
+        $this->finder      = $finder;
+        $this->normalizer  = $normalizer;
     }
 
     /**
@@ -92,11 +90,7 @@ class Loader implements Twig_LoaderInterface, Twig_ExistsLoaderInterface
      */
     protected function normalizeName($name)
     {
-        if ($this->files->extension($name) === $this->extension) {
-            $name = substr($name, 0, - (strlen($this->extension) + 1));
-        }
-
-        return $name;
+        return $this->normalizer->normalizeName($name);
     }
 
     /**

@@ -12,7 +12,7 @@
 namespace TwigBridge\Engine;
 
 use Illuminate\View\Engines\CompilerEngine;
-use TwigBridge\Twig\Loader;
+use TwigBridge\Twig\LoaderInterface;
 use Twig_Error;
 use ErrorException;
 
@@ -38,11 +38,11 @@ class Twig extends CompilerEngine
     /**
      * Create a new Twig view engine instance.
      *
-     * @param \TwigBridge\Engine\Compiler        $compiler
-     * @param \TwigBridge\Twig\Loader            $loader
-     * @param array                              $globalData
+     * @param \TwigBridge\Engine\Compiler         $compiler
+     * @param \TwigBridge\Twig\LoaderInterface    $loader
+     * @param array                               $globalData
      */
-    public function __construct(Compiler $compiler, Loader $loader, array $globalData = [])
+    public function __construct(Compiler $compiler, LoaderInterface $loader, array $globalData = [])
     {
         parent::__construct($compiler);
 
