@@ -44,11 +44,8 @@ class Normalizer
      */
     public function normalizeName($name)
     {
-        $debug = strpos($name, 'orm_div_layout');//&& !strpos($name, '.html')
         foreach ($this->extensions as $config) {
-            //if($debug) pyk_printr([$config, $name, substr($name, $config['position']), substr($name, 0, $config['position'])]);
             if (substr($name, $config['position']) === $config['value']) {
-                //if($debug) pyk_die();
                 return substr($name, 0, $config['position']);
             }
         }
