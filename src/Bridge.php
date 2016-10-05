@@ -40,6 +40,11 @@ class Bridge extends Twig_Environment
     protected $app;
 
     /**
+     * @var array
+     */
+    private $extensionAliases = [];
+
+    /**
      * {@inheritdoc}
      */
     public function __construct(Normalizer $normalizer, Twig_LoaderInterface $loader, $options = [], Container $app = null)
@@ -150,5 +155,28 @@ class Bridge extends Twig_Environment
         list($namespace, $name) = explode($delimiter, $name);
 
         return $namespace.$delimiter.str_replace('/', '.', $name);
+    }
+
+    /**
+     * @param $extensionName
+     * @param $aliasName
+     * @return $this
+     */
+    public function addExtensionAlias($extensionName, $aliasName)
+    {
+        $this->extensionAliases[$aliasName] = $extensionName;
+        return $this;
+    }
+
+    /**
+     * @param string $class
+     * @return \Twig_ExtensionInterface
+     */
+    public function getExtension($class)
+    {
+        if(!empty($this->extensionAliases[$class])) {
+            $class = $this->extensionAliases[$class];
+        }
+        return parent::getExtension($class);
     }
 }
